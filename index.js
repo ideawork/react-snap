@@ -74,7 +74,10 @@ const defaultOptions = {
   //# another feature creep
   // tribute to Netflix Server Side Only React https://twitter.com/NetflixUIE/status/923374215041912833
   // but this will also remove code which registers service worker
-  removeScriptTags: false
+  removeScriptTags: false,
+  // ignore potentially non fatal errors that will cause the crawl to stop
+  ignorePageErrors: false,
+  defaultNavigationTime: 30000 //ms
 };
 
 /**
@@ -514,8 +517,9 @@ const fixParcelChunksIssue = ({
 }) => {
   return page.evaluate(
     (basePath, http2PushManifest, inlineCss) => {
-      const localScripts = Array.from(document.scripts)
-        .filter(x => x.src && x.src.startsWith(basePath))
+      const localScripts = Array.from(document.scripts).filter(
+        x => x.src && x.src.startsWith(basePath)
+      );
 
       const mainRegexp = /main\.[\w]{8}\.js/;
       const mainScript = localScripts.find(x => mainRegexp.test(x.src));
@@ -840,7 +844,7 @@ const run = async (userOptions, { fs } = { fs: nativeFs }) => {
         );
         routePath = normalizePath(routePath);
         if (routePath !== newPath) {
-          console.log(newPath)
+          console.log(newPath);
           console.log(`💬  in browser redirect (${newPath})`);
           addToQueue(newRoute);
         }
